@@ -1,0 +1,8 @@
+.idea
+.vscode
+logs
+uploads
+downloads
+*.exe
+.run
+config.yaml

@@ -1,0 +1,40 @@
+web:
+  port: 9950
+  ip: "127.0.0.1"
+  ip_admin: "127.0.0.1"
+  port_admin: 9960
+  debug: false
+  run_mode: ""
+  env:"local"
+log:
+  info:
+    filename: "./storage/logs/info.log"
+  error:
+    filename: "./storage/logs/error.log"
+aes:
+  key: "tk3lxWfTln4/adPAaA8/ao6QsRP+Z1kYHSDcOsBFU94="
+  iv: "xjbM7kGZk1SJ1qykvw6ZPg=="
+web_auth_url: "http://127.0.0.1:9980"
+oss_url: "http://file-service.hnlanzhong.com"
+cron: false
+storage:
+  upload: "./storage/uploads"
+  download: "./storage/downloads"
+redis:
+  host: "127.0.0.1"
+  port: 6379
+  password:
+  db: 0
+mysql:
+  mysql:
+    user: "dev"
+    port: 3306
+    password: "dev01#SQL@hnwf"
+    host: "39.101.167.54"
+    database: "custom_insurance"
+  mysql_read_list:
+    - user: "dev"
+      port: 3306
+      password: "dev01#SQL@hnwf"
+      host: "39.101.167.54"
+      database: "custom_insurance"
