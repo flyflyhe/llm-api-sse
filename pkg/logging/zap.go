@@ -1,15 +1,12 @@
 package logging
 
 import (
-	"custom_insurance/configs"
-	"custom_insurance/tools/httpHelper"
-	"fmt"
+	"bm/internal/config"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
-	"time"
 )
 
 var zapLog *zap.Logger
@@ -38,23 +35,23 @@ func initZap(debug bool) {
 	})
 
 	log.Println("输出日志目录-----------------------------------------------------")
-	log.Println(configs.GetApp().Log.Info.Filename)
+	log.Println(config.GetApp().Log.Info.Filename)
 	//info文件writeSyncer
 	infoFileWriteSyncer := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   configs.GetApp().Log.Info.Filename, //日志文件存放目录，如果文件夹不存在会自动创建
-		MaxSize:    100,                                //文件大小限制,单位MB
-		MaxBackups: 100,                                //最大保留日志文件数量
-		MaxAge:     30,                                 //日志文件保留天数
-		Compress:   false,                              //是否压缩处理
+		Filename:   config.GetApp().Log.Info.Filename, //日志文件存放目录，如果文件夹不存在会自动创建
+		MaxSize:    100,                               //文件大小限制,单位MB
+		MaxBackups: 100,                               //最大保留日志文件数量
+		MaxAge:     30,                                //日志文件保留天数
+		Compress:   false,                             //是否压缩处理
 	})
 	infoFileCore := zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(infoFileWriteSyncer, zapcore.AddSync(os.Stdout)), lowPriority) //第三个及之后的参数为写入文件的日志级别,ErrorLevel模式只记录error级别的日志
 	//error文件writeSyncer
 	errorFileWriteSyncer := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   configs.GetApp().Log.Error.Filename, //日志文件存放目录
-		MaxSize:    100,                                 //文件大小限制,单位MB
-		MaxBackups: 5,                                   //最大保留日志文件数量
-		MaxAge:     30,                                  //日志文件保留天数
-		Compress:   false,                               //是否压缩处理
+		Filename:   config.GetApp().Log.Error.Filename, //日志文件存放目录
+		MaxSize:    100,                                //文件大小限制,单位MB
+		MaxBackups: 5,                                  //最大保留日志文件数量
+		MaxAge:     30,                                 //日志文件保留天数
+		Compress:   false,                              //是否压缩处理
 	})
 	errorFileCore := zapcore.NewCore(encoder, zapcore.NewMultiWriteSyncer(errorFileWriteSyncer, zapcore.AddSync(os.Stdout)), highPriority) //第三个及之后的参数为写入文件的日志级别,ErrorLevel模式只记录error级别的日志
 
@@ -69,20 +66,20 @@ func initZap(debug bool) {
 	options = append(options, zap.Hooks(func(entry zapcore.Entry) error {
 		if entry.Level == zapcore.ErrorLevel && (entry.LoggerName == "tip" || entry.LoggerName == "we") {
 
-			content := fmt.Sprintf("环境:%s,时间%s,\n消息:%s,\n堆栈:%s", configs.GetApp().Web.Env, entry.Time.Format(time.DateTime), entry.Message, entry.Stack)
-			if entry.LoggerName == "tip" {
-				content = fmt.Sprintf("环境:%s,时间%s,\n消息:%s", configs.GetApp().Web.Env, entry.Time.Format(time.DateTime), entry.Message)
-			}
-			httpHelper.PostJson(
-				"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=8a150419-8e4c-456c-af8f-a57b0355e6df",
-				map[string]interface{}{
-					"msgtype": "text",
-					"text": map[string]string{
-						"content": content,
-					},
-				},
-				nil,
-			)
+			//content := fmt.Sprintf("环境:%s,时间%s,\n消息:%s,\n堆栈:%s", config.GetApp().Web.Env, entry.Time.Format(time.DateTime), entry.Message, entry.Stack)
+			//if entry.LoggerName == "tip" {
+			//	content = fmt.Sprintf("环境:%s,时间%s,\n消息:%s", config.GetApp().Web.Env, entry.Time.Format(time.DateTime), entry.Message)
+			//}
+			//httpHelper.PostJson(
+			//	"https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=8a150419-8e4c-456c-af8f-a57b0355e6df",
+			//	map[string]interface{}{
+			//		"msgtype": "text",
+			//		"text": map[string]string{
+			//			"content": content,
+			//		},
+			//	},
+			//	nil,
+			//)
 		}
 		return nil
 	}))

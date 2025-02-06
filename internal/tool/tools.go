@@ -1,7 +1,7 @@
 package tool
 
 import (
-	"custom_insurance/pkg/logging"
+	"bm/pkg/logging"
 	"encoding/json"
 	"github.com/jinzhu/now"
 	"github.com/shopspring/decimal"
