@@ -1,8 +1,8 @@
 package db
 
 import (
+	"bm/internal/config"
 	"context"
-	"custom_insurance/configs"
 	"fmt"
 	"github.com/redis/go-redis/v9"
 	"time"
@@ -10,7 +10,7 @@ import (
 
 var rdb *redis.Client
 
-func InitRedis(redisConfig configs.RedisConfig) {
+func InitRedis(redisConfig config.RedisConfig) {
 	rdb = redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port),
 		Password: redisConfig.Password,
