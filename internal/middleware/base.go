@@ -40,11 +40,15 @@ func Print() app.HandlerFunc {
 
 		c.Next(ctx)
 
-		reqRes.Response = string(c.Response.Body())
-		if strings.Contains(c.Response.Header.Get("Content-type"), "application/json") {
-			_ = json.Unmarshal(c.Response.Body(), &reqRes.Response)
-		}
+		tool.AsyncTask(func() error {
+			reqRes.Response = string(c.Response.Body())
+			if strings.Contains(c.Response.Header.Get("Content-type"), "application/json") {
+				_ = json.Unmarshal(c.Response.Body(), &reqRes.Response)
+			}
 
-		logging.Logger.Sugar().Info(tool.ToJson(reqRes))
+			logging.Logger.Sugar().Info(tool.ToJson(reqRes))
+
+			return nil
+		})
 	}
 }
