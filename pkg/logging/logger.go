@@ -5,10 +5,17 @@ import (
 	"go.uber.org/zap"
 )
 
+type Config struct {
+	Debug     bool
+	InfoFile  string
+	ErrorFile string
+	CronFile  string
+}
+
 var Logger *ZLog
 
-func InitLogger(debug bool) {
-	initZap(debug)
+func InitLogger(config Config) {
+	initZap(config)
 	Logger = &ZLog{zapLog}
 }
 
