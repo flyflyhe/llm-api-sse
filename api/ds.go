@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/hertz-contrib/sse"
+	ark "github.com/sashabaranov/go-openai"
 	"io"
 	"net/http"
 )
@@ -37,6 +38,7 @@ func (h *Ds) ChatCompletion(ctx context.Context, rc *app.RequestContext) {
 
 	defer stream.Close()
 
+	fullContent := ""
 	for {
 		recv, err := stream.Recv()
 		if err == io.EOF {
@@ -57,8 +59,12 @@ func (h *Ds) ChatCompletion(ctx context.Context, rc *app.RequestContext) {
 				return
 			}
 			fmt.Print(recv.Choices[0].Delta.Content)
+			fullContent += recv.Choices[0].Delta.Content
 		}
 	}
+
+	ds.AppendMessageV1(reqForm.ChatSessionId, reqForm.Prompt)
+	ds.AppendMessage(reqForm.ChatSessionId, fullContent, ark.ChatMessageRoleAssistant)
 
 	if err = s.Publish(&sse.Event{Event: "done"}); err != nil {
 		return

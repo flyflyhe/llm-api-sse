@@ -2,6 +2,8 @@ package ai
 
 import (
 	"bm/internal/form"
+	"bm/internal/tool"
+	"bm/pkg/logging"
 	"context"
 	ark "github.com/sashabaranov/go-openai"
 	"sync"
@@ -34,6 +36,30 @@ func (d *Ds) SetMessages(chatSessionId string, messages []ark.ChatCompletionMess
 	msgStore[chatSessionId] = messages
 }
 
+func (d *Ds) AppendMessageV1(chatSessionId string, message string) {
+	msgMu.Lock()
+	defer msgMu.Unlock()
+
+	role := ark.ChatMessageRoleUser
+	if msgStore[chatSessionId] == nil {
+		role = ark.ChatMessageRoleSystem
+	}
+
+	msgStore[chatSessionId] = append(msgStore[chatSessionId], ark.ChatCompletionMessage{
+		Role:    role,
+		Content: message,
+	})
+}
+
+func (d *Ds) AppendMessage(chatSessionId string, message, role string) {
+	msgMu.Lock()
+	defer msgMu.Unlock()
+	msgStore[chatSessionId] = append(msgStore[chatSessionId], ark.ChatCompletionMessage{
+		Role:    role,
+		Content: message,
+	})
+}
+
 func (d *Ds) ChatCompletions(reqForm form.DsRequest) (stream *ark.ChatCompletionStream, err error) {
 	client := d.GetClient()
 
@@ -52,8 +78,7 @@ func (d *Ds) ChatCompletions(reqForm form.DsRequest) (stream *ark.ChatCompletion
 		})
 	}
 
-	d.SetMessages(reqForm.ChatSessionId, msgList)
-
+	logging.Logger.Sugar().Info("msgList", tool.ToJson(msgList))
 	stream, err = client.CreateChatCompletionStream(
 		context.Background(),
 		ark.ChatCompletionRequest{
