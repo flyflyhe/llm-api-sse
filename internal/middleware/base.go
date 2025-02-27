@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/google/uuid"
+	"net/http"
 	"strings"
 )
 
@@ -50,5 +51,35 @@ func Print() app.HandlerFunc {
 
 			return nil
 		})
+	}
+}
+
+func CORSMiddleware() app.HandlerFunc {
+	return func(ctx context.Context, rc *app.RequestContext) {
+		// 设置允许的来源
+		origin := rc.Request.Header.Get("Origin")
+		if origin != "" {
+			rc.Response.Header.Set("Access-Control-Allow-Origin", origin)
+		} else {
+			rc.Response.Header.Set("Access-Control-Allow-Origin", "*")
+		}
+
+		// 设置允许的请求方法
+		rc.Response.Header.Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+
+		// 设置允许的请求头
+		rc.Response.Header.Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		// 设置是否允许携带凭证
+		rc.Response.Header.Set("Access-Control-Allow-Credentials", "true")
+
+		// 处理预检请求（OPTIONS）
+		if string(rc.Request.Method()) == http.MethodOptions {
+			rc.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		// 继续处理请求
+		rc.Next(ctx)
 	}
 }

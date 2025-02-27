@@ -5,7 +5,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/route"
+	"github.com/hertz-contrib/sse"
+	"net/http"
 	"time"
 )
 
@@ -34,16 +37,30 @@ func InitPublic(group *route.RouterGroup) {
 		return
 	})
 
-	group.GET("/stream", func(ctx context.Context, rc *app.RequestContext) {
-		rc.Response.Header.Set("Content-Type", "text/event-stream")
-		rc.Response.Header.Set("Cache-Control", "no-cache")
-		rc.Response.Header.Set("Connection", "keep-alive")
+	group.POST("/stream", func(ctx context.Context, rc *app.RequestContext) {
+		lastEventID := sse.GetLastEventID(rc)
+		hlog.CtxInfof(ctx, "last event ID: %s", lastEventID)
 
+		// you must set status code and response headers before first render call
+		rc.SetStatusCode(http.StatusOK)
+		s := sse.NewStream(rc)
 		for i := 0; i < 10; i++ {
 			time.Sleep(time.Second)
-			rc.JSON(200, fmt.Sprintf("%d\n", i))
+			event := &sse.Event{
+				Event: "timestamp",
+				Data:  []byte(fmt.Sprintf("%d", i)),
+				ID:    fmt.Sprintf("%d", i),
+			}
+			err := s.Publish(event)
+			if err != nil {
+				return
+			}
+		}
+
+		if err := s.Publish(&sse.Event{Event: "done"}); err != nil {
+			return
 		}
 	})
 
-	group.GET("/ds", ds.ChatCompletion)
+	group.POST("/ds", ds.ChatCompletion)
 }

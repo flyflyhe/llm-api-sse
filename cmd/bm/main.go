@@ -42,7 +42,7 @@ func main() {
 
 	engine := server.Default(server.WithHostPorts(fmt.Sprintf("%s:%d", config.GetApp().Web.Ip, config.GetApp().Web.Port)))
 
-	engine.Use(middleware.Print())
+	engine.Use(middleware.Print(), middleware.CORSMiddleware())
 	//engine.Use(accesslog.New(accesslog.WithFormat("[${time}] ${status} - ${latency} ${method} ${path} ${queryParams}")))
 	//路由
 	{
@@ -62,7 +62,7 @@ func main() {
 		// 启动 HTTP 服务
 
 		tool.AsyncTask(func() error {
-			log.Printf("启动静态文件服务，监听端口 %s，静态文件目录：%s\n", config.GetApp().Web.PortAdmin, staticDir)
+			log.Printf("启动静态文件服务，监听端口 %d，静态文件目录：%s\n", config.GetApp().Web.PortAdmin, staticDir)
 			log.Fatal(http.ListenAndServe(fmt.Sprintf("%s:%d", config.GetApp().Web.IpAdmin, config.GetApp().Web.PortAdmin), nil))
 			return nil
 		})

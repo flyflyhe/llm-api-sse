@@ -1,7 +1,7 @@
 package form
 
 type DsRequest struct {
-	ChatSessionId   string  `json:"chat_session_id"`
+	ChatSessionId   string  `json:"chat_session_id,required"`
 	ParentMessageId int32   `json:"parent_message_id"`
 	Prompt          string  `json:"prompt"`
 	RefFileIds      []int32 `json:"ref_file_ids"`
