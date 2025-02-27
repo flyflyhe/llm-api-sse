@@ -26,7 +26,12 @@ func main() {
 		fmt.Println("当前工作目录:" + currentPath)
 	}
 	config.InitConfig(configPath)
-	logging.InitLogger(true)
+	logging.InitLogger(logging.Config{
+		Debug:     false,
+		InfoFile:  "",
+		ErrorFile: "",
+		CronFile:  "",
+	})
 	//db.InitDb(config.GetApp().Mysql)
 
 	g := gen.NewGenerator(gen.Config{

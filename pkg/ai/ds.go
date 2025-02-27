@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"bm/internal/config"
 	"bm/internal/form"
 	"bm/internal/tool"
 	"bm/pkg/logging"
@@ -13,16 +14,22 @@ var msgStore = map[string][]ark.ChatCompletionMessage{}
 var msgMu sync.Mutex
 
 type Ds struct {
-	token string
+	token   string
+	baseUrl string
+	model   string
 
 	mu     sync.Mutex
 	client *ark.Client
+	ctx    context.Context
 }
 
-func NewDs(token string) *Ds {
+func NewDs(ctx context.Context, llmConfig config.LLM) *Ds {
 	return &Ds{
-		token: token,
-		mu:    sync.Mutex{},
+		token:   llmConfig.Token,
+		baseUrl: llmConfig.BaseUrl,
+		model:   llmConfig.Model,
+		ctx:     ctx,
+		mu:      sync.Mutex{},
 	}
 }
 
@@ -78,11 +85,11 @@ func (d *Ds) ChatCompletions(reqForm form.DsRequest) (stream *ark.ChatCompletion
 		})
 	}
 
-	logging.Logger.Sugar().Info("msgList", tool.ToJson(msgList))
+	logging.Logger.WithCtx(d.ctx).Info("msgList", tool.ToJson(msgList))
 	stream, err = client.CreateChatCompletionStream(
 		context.Background(),
 		ark.ChatCompletionRequest{
-			Model:    "ep-20250220171927-7w4pc",
+			Model:    d.model,
 			Messages: msgList,
 		},
 	)
@@ -97,9 +104,9 @@ func (d *Ds) GetClient() *ark.Client {
 		return d.client
 	}
 
-	config := ark.DefaultConfig("76227cb5-a62e-4f1b-83ec-20f67137442f")
-	config.BaseURL = "https://ark.cn-beijing.volces.com/api/v3"
-	d.client = ark.NewClientWithConfig(config)
+	arkConfig := ark.DefaultConfig(d.token)
+	arkConfig.BaseURL = d.baseUrl
+	d.client = ark.NewClientWithConfig(arkConfig)
 
 	return d.client
 }

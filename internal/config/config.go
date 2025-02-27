@@ -28,6 +28,7 @@ type Config struct {
 	}
 	Mysql MysqlConfig
 	Redis RedisConfig
+	LLM   LLM
 }
 
 type web struct {
@@ -65,6 +66,12 @@ type RedisConfig struct {
 type MysqlConfig struct {
 	Mysql         mysqlConfigInternal
 	MysqlReadList []mysqlConfigInternal `mapstructure:"mysql_read_list"`
+}
+
+type LLM struct {
+	Model   string
+	BaseUrl string `mapstructure:"base_url"`
+	Token   string
 }
 
 type mysqlConfigInternal struct {

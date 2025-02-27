@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bm/internal/config"
 	"bm/internal/form"
 	"bm/pkg/ai"
 	"context"
@@ -23,7 +24,7 @@ func (h *Ds) ChatCompletion(ctx context.Context, rc *app.RequestContext) {
 		return
 	}
 
-	ds := ai.NewDs("76227cb5-a62e-4f1b-83ec-20f67137442f")
+	ds := ai.NewDs(ctx, config.GetApp().LLM)
 
 	rc.SetStatusCode(http.StatusOK)
 	s := sse.NewStream(rc)
@@ -58,7 +59,6 @@ func (h *Ds) ChatCompletion(ctx context.Context, rc *app.RequestContext) {
 			if err != nil {
 				return
 			}
-			fmt.Print(recv.Choices[0].Delta.Content)
 			fullContent += recv.Choices[0].Delta.Content
 		}
 	}

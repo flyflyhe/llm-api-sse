@@ -1,21 +1,15 @@
 web:
-  port: 9950
+  port: 9950 #api 端口
   ip: "127.0.0.1"
   ip_admin: "127.0.0.1"
-  port_admin: 9960
+  port_admin: 9960 #页面端口
   debug: false
   run_mode: ""
-  env:"local"
 log:
   info:
     filename: "./storage/logs/info.log"
   error:
     filename: "./storage/logs/error.log"
-aes:
-  key: "tk3lxWfTln4/adPAaA8/ao6QsRP+Z1kYHSDcOsBFU94="
-  iv: "xjbM7kGZk1SJ1qykvw6ZPg=="
-web_auth_url: "http://127.0.0.1:9980"
-oss_url: "http://file-service.hnlanzhong.com"
 cron: false
 storage:
   upload: "./storage/uploads"
@@ -25,16 +19,20 @@ redis:
   port: 6379
   password:
   db: 0
+llm:
+  model: "" #模型名称 火山引擎
+  base_url: "" #接入地址
+  token: "" #token
 mysql:
   mysql:
     user: "dev"
     port: 3306
-    password: "dev01#SQL@hnwf"
-    host: "39.101.167.54"
-    database: "custom_insurance"
+    password: ""
+    host: ""
+    database: ""
   mysql_read_list:
     - user: "dev"
       port: 3306
-      password: "dev01#SQL@hnwf"
-      host: "39.101.167.54"
-      database: "custom_insurance"
+      password: ""
+      host: ""
+      database: ""
