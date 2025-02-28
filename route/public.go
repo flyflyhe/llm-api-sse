@@ -63,4 +63,5 @@ func InitPublic(group *route.RouterGroup) {
 	})
 
 	group.POST("/ds", ds.ChatCompletion)
+	group.GET("/ds-tool", ds.TestFunction)
 }

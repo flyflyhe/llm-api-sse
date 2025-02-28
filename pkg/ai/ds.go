@@ -6,6 +6,7 @@ import (
 	"bm/internal/tool"
 	"bm/pkg/logging"
 	"context"
+	"encoding/json"
 	ark "github.com/sashabaranov/go-openai"
 	"sync"
 )
@@ -95,6 +96,91 @@ func (d *Ds) ChatCompletions(reqForm form.DsRequest) (stream *ark.ChatCompletion
 	)
 
 	return
+}
+
+func (d *Ds) TestFunction() ([]ark.ChatCompletionMessage, error) {
+	param := map[string]interface{}{
+		"type": "object",
+		"properties": map[string]interface{}{
+			"location": map[string]string{
+				"type":        "string",
+				"description": "The city and state, e.g. San Francisco, CA",
+			},
+		},
+		"required": []string{"location"},
+	}
+
+	pj, err := json.Marshal(param)
+	if err != nil {
+		return nil, err
+	}
+	logging.Logger.WithCtx(d.ctx).Info(string(pj))
+	tools := []ark.Tool{{
+		Type: "function",
+		Function: &ark.FunctionDefinition{
+			Name:        "get_weather",
+			Description: "Get weather of an location, the user shoud supply a location first",
+			Strict:      false,
+			Parameters:  param,
+		},
+	}}
+
+	var messageList []ark.ChatCompletionMessage
+	message := ark.ChatCompletionMessage{
+		Role:    "user",
+		Content: "How's the weather in Hangzhou?",
+	}
+	messageList = append(messageList, message)
+
+	client := d.GetClient()
+
+	res, err := client.CreateChatCompletion(
+		context.Background(),
+		ark.ChatCompletionRequest{
+			Model:    d.model,
+			Messages: messageList,
+			Tools:    tools,
+		},
+	)
+
+	if err != nil {
+		logging.Logger.WithCtx(d.ctx).Error("ChatCompletions", err)
+		return nil, err
+	}
+
+	logging.Logger.WithCtx(d.ctx).Info("ChatCompletions", res.Choices[0].Message.Content)
+
+	toolCall := res.Choices[0].Message.ToolCalls[0]
+
+	messageList = append(messageList, res.Choices[0].Message)
+	messageList = append(messageList, ark.ChatCompletionMessage{
+		Role:         ark.ChatMessageRoleTool,
+		Content:      "24℃",
+		Refusal:      "",
+		MultiContent: nil,
+		Name:         "",
+		FunctionCall: nil,
+		ToolCalls:    nil,
+		ToolCallID:   toolCall.ID,
+	})
+
+	res, err = client.CreateChatCompletion(
+		context.Background(),
+		ark.ChatCompletionRequest{
+			Model:    d.model,
+			Messages: messageList,
+			Tools:    tools,
+		},
+	)
+
+	if err != nil {
+		logging.Logger.WithCtx(d.ctx).Error("ChatCompletions", err)
+		return nil, err
+	}
+
+	messageList = append(messageList, res.Choices[0].Message)
+	logging.Logger.WithCtx(d.ctx).Info("ChatCompletions", res.Choices[0].Message.Content)
+	return messageList, nil
 }
 
 func (d *Ds) GetClient() *ark.Client {

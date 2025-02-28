@@ -70,3 +70,15 @@ func (h *Ds) ChatCompletion(ctx context.Context, rc *app.RequestContext) {
 		return
 	}
 }
+
+func (h *Ds) TestFunction(ctx context.Context, rc *app.RequestContext) {
+
+	ds := ai.NewDs(ctx, config.GetApp().LLM)
+
+	if res, err := ds.TestFunction(); err != nil {
+		h.Fail(rc, err.Error())
+		return
+	} else {
+		h.Success(rc, res)
+	}
+}
