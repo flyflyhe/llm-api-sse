@@ -153,6 +153,8 @@ func (d *Ds) TestFunction() ([]ark.ChatCompletionMessage, error) {
 	messageRes := res.Choices[0].Message
 	toolCall := messageRes.ToolCalls[0]
 
+	//调用自己的真实函数
+
 	messageList = append(messageList, messageRes)
 	messageList = append(messageList, ark.ChatCompletionMessage{
 		Role:         ark.ChatMessageRoleTool,
