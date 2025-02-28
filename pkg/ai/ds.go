@@ -148,11 +148,12 @@ func (d *Ds) TestFunction() ([]ark.ChatCompletionMessage, error) {
 		return nil, err
 	}
 
-	logging.Logger.WithCtx(d.ctx).Info("ChatCompletions", res.Choices[0].Message.Content)
+	logging.Logger.WithCtx(d.ctx).Info("ChatCompletions", res.Choices[0].Message)
 
-	toolCall := res.Choices[0].Message.ToolCalls[0]
+	messageRes := res.Choices[0].Message
+	toolCall := messageRes.ToolCalls[0]
 
-	messageList = append(messageList, res.Choices[0].Message)
+	messageList = append(messageList, messageRes)
 	messageList = append(messageList, ark.ChatCompletionMessage{
 		Role:         ark.ChatMessageRoleTool,
 		Content:      "24℃",
@@ -179,7 +180,8 @@ func (d *Ds) TestFunction() ([]ark.ChatCompletionMessage, error) {
 	}
 
 	messageList = append(messageList, res.Choices[0].Message)
-	logging.Logger.WithCtx(d.ctx).Info("ChatCompletions", res.Choices[0].Message.Content)
+	resJ, _ := json.Marshal(res)
+	logging.Logger.WithCtx(d.ctx).Info("ChatCompletions", string(resJ))
 	return messageList, nil
 }
 
